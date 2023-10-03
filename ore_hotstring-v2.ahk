@@ -101,16 +101,11 @@ return
     MyGui := Gui(,"今年日付入力")
     MyGui.Add("Text",, "指定日[4ケタ]")
     MyGui.Add("Edit", "vTargetDay ym Limit4 Number")  ; ymオプションは、コントロールの新しい列を開始します。
-    MyGui.Add("Button", "default ", "OK").OnEvent("Click", InsDateExec)
+    MyGui.Add("Button", "default", "OK").OnEvent("Click", InsDateExec)
     MyGui.Add("Button", " x+20" , "Cancel").OnEvent("Click", CloseWindow)
-    MyGui.OnEvent("Escape", CloseWindow)
+    MyGui.OnEvent("Escape", CloseWindow) ; [ESC] キーでダイアログを閉じる
     MyGui.show()
-    ; MyGui_Escape(ThisGui) 
-    ; {
-    ;     ; [ESC] キーでダイアログを閉じる
-    ;     MyGui.Destroy()
-    ;     Return
-    ; }
+    
     CloseWindow(*)
     {
         MyGui.Destroy()
