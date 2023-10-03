@@ -35,9 +35,27 @@ return
 ;git commit -m ""
 ::gco[[::
 {
-A_Clipboard := 'git commit -m ""'
-Send "+{INSERT}"
-return
+    A_Clipboard := 'git commit -m ""'
+    Send "+{INSERT}"
+    return
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ユーロ、ポンド入力
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ユーロ、ポンドの記号は、ファイルをSJIS で保存すると文字化けするので、UTF-8 BOM付きで保存する必要がある。
+::e[[::
+{
+    A_Clipboard := '€'
+    Send "+{INSERT}"
+    return
+}
+
+::p[[::
+{
+    A_Clipboard := '￡'
+    Send "+{INSERT}"
+    return
 }
 
 
@@ -54,7 +72,7 @@ return
     dowstr := get_dowstr(downum)
     A_Clipboard := TimeString . dowstr
     Send "+{INSERT}"
-  return
+    return
 
 }
 
@@ -85,16 +103,14 @@ return
     MyGui.Add("Edit", "vTargetDay ym Limit4 Number")  ; ymオプションは、コントロールの新しい列を開始します。
     MyGui.Add("Button", "default ", "OK").OnEvent("Click", InsDateExec)
     MyGui.Add("Button", " x+20" , "Cancel").OnEvent("Click", CloseWindow)
-    Gui_Escape(thisGui) 
-    {
-        MyGui.Destroy()
-        Return
-    }
+    MyGui.OnEvent("Escape", CloseWindow)
     MyGui.show()
-    ; Gui,Add,Text, yp+10,指定日[4ケタ]
-    ; Gui,Add,Edit,x100 yp-4 vTargetDate w50 Limit4 Number ; 入力フォーム、4ケタ、数字のみの制限
-    ; Gui,Add,Button,gInsDateExec x170 yp-2 default,&OK ; オプションで default を指定すると、Enter が押されたときにそのボタンのラベルが処理されます
-    ; Gui,Show
+    ; MyGui_Escape(ThisGui) 
+    ; {
+    ;     ; [ESC] キーでダイアログを閉じる
+    ;     MyGui.Destroy()
+    ;     Return
+    ; }
     CloseWindow(*)
     {
         MyGui.Destroy()
@@ -103,25 +119,16 @@ return
     InsDateExec(*)
     {
         Saved := MyGui.Submit()
-        ; MsgBox("You entered '" Saved.TargetDay)
         TargetDay := Saved.TargetDay
-        ; Gui,Submit
-        ; Gui,Destroy
         ; ;今年の年を取得
-        ; FormatTime, YearString,, ShortDate
         YearString := FormatTime(,"ShortDate")
-        ; StringMid,YearString,YearString,1,4 ; 年を取得
         YearString := SubStr(YearString, 1, 4)
         ; ;取得した月日のテキストから曜日を取得
-        ; FormatTime, dayString,%YearString%%TargetDate%000000,WDay
         dayString := FormatTime(YearString . TargetDay . "000000"  ,"WDay")
         ; ;取得したテキストから年月日を取得
-        ; FormatTime, targetString,%YearString%%TargetDate%000000,LongDate
         targetString := FormatTime(YearString . TargetDay . "000000" ,"LongDate")
         ; ;曜日を(月)の形式に変換
-        ; dowstr := get_dowstr(dayString)
         dowstr := get_dowstr(dayString)
-        ; A_Clipboard := targetString
         A_Clipboard := targetString . dowstr
         Send "+{INSERT}"
     Return
@@ -135,7 +142,6 @@ get_dowstr(theNum)
     dowtable := "日月火水木金土"
     ; Wday は日曜日が 1、
     dowstr := ""
-    ; StringMid, dowstr, dowtable, %theNum%, 1
     dowstr := SubStr(dowtable, theNum, 1)
     return "(" dowstr ")"
 }
