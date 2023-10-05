@@ -1,20 +1,17 @@
-#Requires AutoHotkey v2.0
-#Warn
-#SingleInstance
-#Hotstring *
+#Requires AutoHotkey v2.0 ; v2.0 のバージョン要件が満たされない場合、エラーを表示し終了します
+#Warn ;タイポや「グローバル」宣言の欠落など、エラーを示す可能性のある特定の条件に対する警告を出す
+#SingleInstance Force ; スクリプトがすでに実行されている場合、ダイアログボックスをスキップして古いインスタンスを自動的に置き換える
+#Hotstring * ; hotsting を終了文字無しで発動させる
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;git push を素早く入力する
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;gp[[ 
 ;git push -u origin HEAD
-; ::gpgp::MsgBox("This is a test")
 ::gp[[::
 {
 A_Clipboard := "git push -u origin HEAD"
 Send "+{INSERT}"
-return
 }
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;git checkout を素早く入力する
@@ -23,9 +20,9 @@ return
 ;git checkout -b 
 ::gch[[::
 {
-A_Clipboard := "git checkout -b"
-Send "+{INSERT}"
-return
+    A_Clipboard := "git checkout -b "
+    Send "+{INSERT}"
+    Sleep 100
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -37,7 +34,8 @@ return
 {
     A_Clipboard := 'git commit -m ""'
     Send "+{INSERT}"
-    return
+    Sleep 100
+    Send "{Left}"
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -48,14 +46,12 @@ return
 {
     A_Clipboard := '€'
     Send "+{INSERT}"
-    return
 }
 
 ::p[[::
 {
     A_Clipboard := '￡'
     Send "+{INSERT}"
-    return
 }
 
 
@@ -65,16 +61,13 @@ return
 ;w[[ → 年月日＋曜日を入力する Hotstring  本体
 ::w[[::
 {
-    ; FormatTime, TimeString,, LongDate
     TimeString := FormatTime(,"LongDate")
-    ; FormatTime, downum,, WDay
     downum := FormatTime(,"WDay")
     dowstr := get_dowstr(downum)
     A_Clipboard := TimeString . dowstr
     Send "+{INSERT}"
-    return
-
 }
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;今日の日付を半角8桁で入力する
@@ -82,53 +75,52 @@ return
 ;q[[ 今日を8桁で入力する
 ::q[[::
 {
-    ; FormatTime, TimeString,, yyyyMMdd
     TimeString := FormatTime(,"yyyyMMdd")
-    ; clipboard = %TimeString%
-    A_Clipboard := TimeString
-    Send "+{INSERT}"
-    return
+    Send TimeString
 }
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;今年の指定日の日付を入力する
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;t[[ → 年月日＋曜日を入力する Hotstring  本体
+;t[[ → 今年の指定日の年月日＋曜日を入力する Hotstring  本体
+
 ::t[[::
 {
-    ; 入力フォーム作成
-    MyGui := Gui(,"今年日付入力")
-    MyGui.Add("Text",, "指定日[4ケタ]")
-    MyGui.Add("Edit", "vTargetDay ym Limit4 Number")  ; ymオプションは、コントロールの新しい列を開始します。
-    MyGui.Add("Button", "default", "OK").OnEvent("Click", InsDateExec)
-    MyGui.Add("Button", " x+20" , "Cancel").OnEvent("Click", CloseWindow)
-    MyGui.OnEvent("Escape", CloseWindow) ; [ESC] キーでダイアログを閉じる
-    MyGui.show()
+    {
+        MyGui := Gui(,"今年日付入力")
+        MyGui.Add("Text",, "指定日[4ケタ]")
+        MyGui.Add("Edit", "vTargetDay Limit4 Number") 
+        MyGui.Add("Button", "default", "OK").OnEvent("Click", InsDateExec) ; ダイアログの「OK」ボタンの表示。オプションに"default"とつけることで、テキストを入力後に「Enter」キーを押したときの動作として設定する 
+        MyGui.Add("Button", " x+20" , "Cancel").OnEvent("Click", CloseWindow) ; キャンセルボタン、ダイアログを閉じる
+        MyGui.OnEvent("Escape", CloseWindow) ; [ESC] キーでダイアログを閉じる
+        MyGui.show() ; Gui を表示する
+    }
     
+    ; MyGui を閉じる関数
     CloseWindow(*)
     {
         MyGui.Destroy()
-        Return
     }
+    ; ダイアログに入力された四桁の数字を年月日＋曜日に変換し、入力する関数
     InsDateExec(*)
     {
         Saved := MyGui.Submit()
         TargetDay := Saved.TargetDay
-        ; ;今年の年を取得
-        YearString := FormatTime(,"ShortDate")
-        YearString := SubStr(YearString, 1, 4)
-        ; ;取得した月日のテキストから曜日を取得
+        ;今年の年を取得
+        YearString := SubStr((FormatTime(,"ShortDate")), 1, 4)
+        ;取得した月日のテキストから曜日を取得
         dayString := FormatTime(YearString . TargetDay . "000000"  ,"WDay")
-        ; ;取得したテキストから年月日を取得
+        ;取得したテキストから年月日を取得
         targetString := FormatTime(YearString . TargetDay . "000000" ,"LongDate")
-        ; ;曜日を(月)の形式に変換
+        ;曜日を(月)の形式に変換
         dowstr := get_dowstr(dayString)
+        if (StrLen(targetString) < 1) {
+            return
+        }
         A_Clipboard := targetString . dowstr
         Send "+{INSERT}"
-    Return
     }
-  return
 }
 
 ;曜日をカッコつきで返す
@@ -136,7 +128,6 @@ get_dowstr(theNum)
 {
     dowtable := "日月火水木金土"
     ; Wday は日曜日が 1、
-    dowstr := ""
     dowstr := SubStr(dowtable, theNum, 1)
-    return "(" dowstr ")"
+    return "(" . dowstr . ")"
 }

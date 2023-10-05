@@ -15,9 +15,8 @@ VSCode をご利用の方は、「[AutoHotkey Plus Plus](https://marketplace.vis
 ## ファイル構成
 
 - ore_hotstring-v2.ahk - プログラムの本体です。
-- ore_hotstring.ahk - AutoHotkey の v1.1 で動いていたプログラムです。v2.0 後方互換性は犠牲となっており、v1.1 のために書かれたスクリプトは基本的に動作せず、改修の必要があります。
+- ore_hotstring.ahk - AutoHotkey の v1.1 で動いていたプログラムです。v2.0 では後方互換性は犠牲となっており、v1.1 のために書かれたスクリプトは基本的に動作せず、改修の必要があります。
 - README.md ahk-project についての説明書です。
-- v2_tutorial.ahk - チュートリアルを受けたときに書いたメモです。
 
 ## 使い方
 
